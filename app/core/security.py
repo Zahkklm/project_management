@@ -10,7 +10,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    result = pwd_context.verify(plain_password, hashed_password)
+    # Truncate plain_password to 72 characters for bcrypt compatibility
+    truncated_password = plain_password[:72]
+    result = pwd_context.verify(truncated_password, hashed_password)
     if isinstance(result, bool):
         return result
     return False
