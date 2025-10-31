@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -17,4 +18,4 @@ class ProjectAccess(Base):
     project = relationship("Project", back_populates="project_accesses")
     user = relationship("User", back_populates="project_accesses")
 
-    __table_args__ = (UniqueConstraint('project_id', 'user_id', name='_project_user_uc'),)
+    __table_args__ = (UniqueConstraint("project_id", "user_id", name="_project_user_uc"),)

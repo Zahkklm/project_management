@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -14,4 +15,6 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     owned_projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
-    project_accesses = relationship("ProjectAccess", back_populates="user", cascade="all, delete-orphan")
+    project_accesses = relationship(
+        "ProjectAccess", back_populates="user", cascade="all, delete-orphan"
+    )
