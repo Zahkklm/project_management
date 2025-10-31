@@ -41,7 +41,9 @@ async def upload_documents(
     uploaded_documents = []
     for file in files:
         content = await file.read()
-        s3_key = s3_service.upload_file(content, str(file.filename or ""), str(file.content_type or ""))
+        s3_key = s3_service.upload_file(
+            content, str(file.filename or ""), str(file.content_type or "")
+        )
 
         if not s3_key:
             raise HTTPException(

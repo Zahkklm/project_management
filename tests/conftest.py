@@ -36,7 +36,7 @@ def client():
     app.dependency_overrides[get_db] = override_get_db
     # Ensure all routers use the override
     for router in app.router.routes:
-        if hasattr(router, 'dependency_overrides'): # for APIRouter
+        if hasattr(router, "dependency_overrides"):  # for APIRouter
             router.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
     yield test_client

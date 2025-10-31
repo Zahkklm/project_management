@@ -1,6 +1,6 @@
+import secrets
 from typing import List, Optional
 
-import secrets
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,9 @@ from app.schemas.project import (
 router = APIRouter()
 
 
-def check_project_access(project_id: int, user: User, db: Session, required_role: Optional[str] = None):
+def check_project_access(
+    project_id: int, user: User, db: Session, required_role: Optional[str] = None
+):
     access = (
         db.query(ProjectAccess)
         .filter(ProjectAccess.project_id == project_id, ProjectAccess.user_id == user.id)
