@@ -26,7 +26,8 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
             detail=("User with this login already exists"),
         )
 
-    hashed_password = get_password_hash(user_data.password)
+    # Truncate password to 72 characters for bcrypt compatibility
+    hashed_password = get_password_hash(user_data.password[:72])
     new_user = User(login=user_data.login, hashed_password=hashed_password)
     db.add(new_user)
     db.commit()
