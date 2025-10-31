@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import auth, documents, projects
 from app.core.config import settings
-from app.api import auth, projects, documents
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 

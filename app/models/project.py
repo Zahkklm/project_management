@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 from app.core.database import Base
 
@@ -17,4 +18,6 @@ class Project(Base):
 
     owner = relationship("User", back_populates="owned_projects")
     documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
-    project_accesses = relationship("ProjectAccess", back_populates="project", cascade="all, delete-orphan")
+    project_accesses = relationship(
+        "ProjectAccess", back_populates="project", cascade="all, delete-orphan"
+    )
