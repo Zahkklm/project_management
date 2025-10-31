@@ -20,4 +20,9 @@ class Settings(BaseSettings):
         env_file = ".env"
 
 
+
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 settings = Settings()
