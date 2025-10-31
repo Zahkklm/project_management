@@ -6,11 +6,11 @@ class UserCreate(BaseModel):
     password: str = Field(..., min_length=6)
     repeat_password: str = Field(..., min_length=6)
 
-    @field_validator('repeat_password')
+    @field_validator("repeat_password")
     @classmethod
     def passwords_match(cls, v, info):
-        if 'password' in info.data and v != info.data['password']:
-            raise ValueError('passwords do not match')
+        if "password" in info.data and v != info.data["password"]:
+            raise ValueError("passwords do not match")
         return v
 
 

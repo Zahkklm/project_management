@@ -4,9 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.main import app
 from app.core.database import Base, get_db
-from app.core.config import settings
+from app.main import app
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -33,8 +32,12 @@ def client():
             yield session
         finally:
             session.close()
-    
+
     app.dependency_overrides[get_db] = override_get_db
+    # Ensure all routers use the override
+    for router in app.router.routes:
+        if hasattr(router, 'dependency_overrides'): # for APIRouter
+            router.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
     yield test_client
     app.dependency_overrides.clear()
@@ -42,28 +45,17 @@ def client():
 
 @pytest.fixture
 def test_user(client):
-    user_data = {
-        "login": "testuser",
-        "password": "testpass123",
-        "repeat_password": "testpass123"
-    }
+    user_data = {"login": "testuser", "password": "testpass123", "repeat_password": "testpass123"}
     response = client.post("/auth", json=user_data)
     return response.json()
 
 
 @pytest.fixture
 def auth_headers(client):
-    user_data = {
-        "login": "testuser",
-        "password": "testpass123",
-        "repeat_password": "testpass123"
-    }
+    user_data = {"login": "testuser", "password": "testpass123", "repeat_password": "testpass123"}
     client.post("/auth", json=user_data)
-    
-    login_data = {
-        "login": "testuser",
-        "password": "testpass123"
-    }
+
+    login_data = {"login": "testuser", "password": "testpass123"}
     response = client.post("/login", json=login_data)
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
