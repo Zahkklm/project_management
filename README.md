@@ -1,4 +1,6 @@
 # Project Management API
+[![CI/CD](https://github.com/Zahkklm/project_management/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Zahkklm/project_management/actions/workflows/ci-cd.yml)
+[![Coverage](https://codecov.io/gh/Zahkklm/project_management/branch/main/graph/badge.svg)](https://codecov.io/gh/Zahkklm/project_management)
 
 A FastAPI-based project management system with document storage, user authentication, and project collaboration features.
 
