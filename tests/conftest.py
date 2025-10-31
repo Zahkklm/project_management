@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -7,17 +9,22 @@ from sqlalchemy.pool import StaticPool
 from app.core.database import Base, get_db
 from app.main import app
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+def get_engine():
+    if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+        return create_engine(
+            SQLALCHEMY_DATABASE_URL,
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+    return create_engine(SQLALCHEMY_DATABASE_URL)
+
+engine = get_engine()
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def setup_db():
     Base.metadata.create_all(bind=engine)
     yield
@@ -25,19 +32,23 @@ def setup_db():
 
 
 @pytest.fixture(scope="function")
-def client():
-    def override_get_db():
-        session = TestingSessionLocal()
-        try:
-            yield session
-        finally:
-            session.close()
+def db_session():
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
+@pytest.fixture(scope="function")
+def client(db_session):
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass
     app.dependency_overrides[get_db] = override_get_db
-    # Ensure all routers use the override
-    for router in app.router.routes:
-        if hasattr(router, "dependency_overrides"):  # for APIRouter
-            router.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
     yield test_client
     app.dependency_overrides.clear()

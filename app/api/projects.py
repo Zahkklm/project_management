@@ -9,12 +9,7 @@ from app.core.database import get_db
 from app.models.project import Project
 from app.models.project_access import ProjectAccess
 from app.models.user import User
-from app.schemas.project import (
-    ProjectCreate,
-    ProjectListResponse,
-    ProjectResponse,
-    ProjectUpdate,
-)
+from app.schemas.project import ProjectCreate, ProjectListResponse, ProjectResponse, ProjectUpdate
 
 router = APIRouter()
 
