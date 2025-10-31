@@ -15,6 +15,8 @@ class Document(Base):
     content_type = Column(String)
     size = Column(Integer)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    uploaded_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    uploaded_at = Column(
+        DateTime, default=lambda: datetime.now(timezone.utc)
+    )
 
     project = relationship("Project", back_populates="documents")

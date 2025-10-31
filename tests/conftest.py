@@ -11,6 +11,7 @@ from app.main import app
 
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
+
 def get_engine():
     if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
         return create_engine(
@@ -20,8 +21,11 @@ def get_engine():
         )
     return create_engine(SQLALCHEMY_DATABASE_URL)
 
+
 engine = get_engine()
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TestingSessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=engine
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -41,6 +45,7 @@ def db_session():
     transaction.rollback()
     connection.close()
 
+
 @pytest.fixture(scope="function")
 def client(db_session):
     def override_get_db():
@@ -48,6 +53,7 @@ def client(db_session):
             yield db_session
         finally:
             pass
+
     app.dependency_overrides[get_db] = override_get_db
     test_client = TestClient(app)
     yield test_client
@@ -56,14 +62,22 @@ def client(db_session):
 
 @pytest.fixture
 def test_user(client):
-    user_data = {"login": "testuser", "password": "testpass123", "repeat_password": "testpass123"}
+    user_data = {
+        "login": "testuser",
+        "password": "testpass123",
+        "repeat_password": "testpass123",
+    }
     response = client.post("/auth", json=user_data)
     return response.json()
 
 
 @pytest.fixture
 def auth_headers(client):
-    user_data = {"login": "testuser", "password": "testpass123", "repeat_password": "testpass123"}
+    user_data = {
+        "login": "testuser",
+        "password": "testpass123",
+        "repeat_password": "testpass123",
+    }
     client.post("/auth", json=user_data)
 
     login_data = {"login": "testuser", "password": "testpass123"}

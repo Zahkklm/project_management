@@ -2,7 +2,11 @@ from fastapi import status
 
 
 def test_create_user(client):
-    user_data = {"login": "newuser", "password": "password123", "repeat_password": "password123"}
+    user_data = {
+        "login": "newuser",
+        "password": "password123",
+        "repeat_password": "password123",
+    }
     response = client.post("/auth", json=user_data)
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
@@ -11,13 +15,21 @@ def test_create_user(client):
 
 
 def test_create_user_duplicate(client, test_user):
-    user_data = {"login": "testuser", "password": "password123", "repeat_password": "password123"}
+    user_data = {
+        "login": "testuser",
+        "password": "password123",
+        "repeat_password": "password123",
+    }
     response = client.post("/auth", json=user_data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_create_user_password_mismatch(client):
-    user_data = {"login": "newuser", "password": "password123", "repeat_password": "different123"}
+    user_data = {
+        "login": "newuser",
+        "password": "password123",
+        "repeat_password": "different123",
+    }
     response = client.post("/auth", json=user_data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

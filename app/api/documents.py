@@ -1,7 +1,14 @@
 import io
 from typing import List
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -16,12 +23,18 @@ from app.services.s3_service import s3_service
 router = APIRouter()
 
 
-@router.get("/project/{project_id}/documents", response_model=List[DocumentResponse])
+@router.get(
+    "/project/{project_id}/documents", response_model=List[DocumentResponse]
+)
 def get_project_documents(
-    project_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    project_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     check_project_access(project_id, current_user, db)
-    documents = db.query(Document).filter(Document.project_id == project_id).all()
+    documents = (
+        db.query(Document).filter(Document.project_id == project_id).all()
+    )
     return documents
 
 
@@ -48,7 +61,7 @@ async def upload_documents(
         if not s3_key:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to upload {file.filename}",
+                detail=(f"Failed to upload {file.filename}"),
             )
 
         document = Document(
@@ -70,25 +83,35 @@ async def upload_documents(
 
 @router.get("/document/{document_id}")
 async def download_document(
-    document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     document = db.query(Document).filter(Document.id == document_id).first()
 
     if not document:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
 
     check_project_access(int(document.project_id), current_user, db)
 
     file_content = s3_service.download_file(str(document.s3_key))
     if not file_content:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to download document"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to download document",
         )
 
     return StreamingResponse(
         io.BytesIO(file_content),
         media_type=str(document.content_type),
-        headers={"Content-Disposition": f"attachment; filename={str(document.filename)}"},
+        headers={
+            "Content-Disposition": (
+                f"attachment; filename={str(document.filename)}"
+            )
+        },
     )
 
 
@@ -102,18 +125,24 @@ async def update_document(
     document = db.query(Document).filter(Document.id == document_id).first()
 
     if not document:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
 
     check_project_access(int(document.project_id), current_user, db)
 
     s3_service.delete_file(str(document.s3_key))
 
     content = await file.read()
-    s3_key = s3_service.upload_file(content, str(file.filename or ""), str(file.content_type or ""))
+    s3_key = s3_service.upload_file(
+        content, str(file.filename or ""), str(file.content_type or "")
+    )
 
     if not s3_key:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to upload document"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to upload document",
         )
 
     setattr(document, "filename", str(file.filename))
@@ -127,14 +156,21 @@ async def update_document(
     return document
 
 
-@router.delete("/document/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/document/{document_id}", status_code=status.HTTP_204_NO_CONTENT
+)
 def delete_document(
-    document_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     document = db.query(Document).filter(Document.id == document_id).first()
 
     if not document:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found",
+        )
 
     check_project_access(int(document.project_id), current_user, db)
 

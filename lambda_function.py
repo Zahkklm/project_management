@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     for record in event["Records"]:
         bucket = record["s3"]["bucket"]["name"]
         key = record["s3"]["object"]["key"]
-        size = record["s3"]["object"]["size"]
+        # size = record["s3"]["object"]["size"]  # Unused variable removed
 
         # Check if it's an image
         if key.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".bmp")):
@@ -54,7 +54,10 @@ def resize_image(bucket, key):
         # Upload resized image
         resized_key = f"resized/{key}"
         s3_client.put_object(
-            Bucket=bucket, Key=resized_key, Body=buffer, ContentType=response["ContentType"]
+            Bucket=bucket,
+            Key=resized_key,
+            Body=buffer,
+            ContentType=response["ContentType"],
         )
         print(f"Resized image uploaded: {resized_key}")
 

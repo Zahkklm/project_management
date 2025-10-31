@@ -1,3 +1,5 @@
+import logging
+
 from pydantic_settings import BaseSettings
 
 
@@ -16,13 +18,16 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0"
     DEBUG: bool = False
 
+    POSTGRES_USER: str = "user"
+    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_DB: str = "project_management"
+    POSTGRES_PORT: str = "5432"
+
     class Config:
         env_file = ".env"
 
 
-
-import logging
 logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
 
 settings = Settings()

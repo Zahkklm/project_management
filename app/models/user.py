@@ -14,7 +14,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    owned_projects = relationship("Project", back_populates="owner", cascade="all, delete-orphan")
+    owned_projects = relationship(
+        "Project", back_populates="owner", cascade="all, delete-orphan"
+    )
     project_accesses = relationship(
         "ProjectAccess", back_populates="user", cascade="all, delete-orphan"
     )

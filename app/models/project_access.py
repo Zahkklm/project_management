@@ -1,6 +1,13 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -18,4 +25,6 @@ class ProjectAccess(Base):
     project = relationship("Project", back_populates="project_accesses")
     user = relationship("User", back_populates="project_accesses")
 
-    __table_args__ = (UniqueConstraint("project_id", "user_id", name="_project_user_uc"),)
+    __table_args__ = (
+        UniqueConstraint("project_id", "user_id", name="_project_user_uc"),
+    )

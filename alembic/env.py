@@ -4,22 +4,22 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 
-from alembic import context
-
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
-
+import alembic.context as context
 from app.core.config import settings
 from app.core.database import Base
-from app.models.document import Document
-from app.models.project import Project
-from app.models.project_access import ProjectAccess
-from app.models.user import User
+
+sys.path.insert(
+    0,
+    os.path.realpath(os.path.join(os.path.dirname(__file__), "..")),
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
 
 target_metadata = Base.metadata
 
@@ -45,8 +45,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
         with context.begin_transaction():
             context.run_migrations()
 

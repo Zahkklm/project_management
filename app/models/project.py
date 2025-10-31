@@ -14,10 +14,18 @@ class Project(Base):
     description = Column(Text)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
 
     owner = relationship("User", back_populates="owned_projects")
-    documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
+    documents = relationship(
+        "Document", back_populates="project", cascade="all, delete-orphan"
+    )
     project_accesses = relationship(
-        "ProjectAccess", back_populates="project", cascade="all, delete-orphan"
+        "ProjectAccess",
+        back_populates="project",
+        cascade="all, delete-orphan",
     )
