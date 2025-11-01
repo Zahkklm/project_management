@@ -1,10 +1,23 @@
 from pydantic import BaseModel, Field, field_validator
 
 
+LOGIN_REGEX = r"^[a-zA-Z0-9_.-]+$"
+
+
 class UserCreate(BaseModel):
-    login: str = Field(..., min_length=3, max_length=50)
-    password: str = Field(..., min_length=6)
-    repeat_password: str = Field(..., min_length=6)
+    login: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        pattern=LOGIN_REGEX,
+        example="johndoe",
+    )
+    password: str = Field(
+        ..., min_length=6, max_length=128, example="strongpassword"
+    )
+    repeat_password: str = Field(
+        ..., min_length=6, max_length=128, example="strongpassword"
+    )
 
     @field_validator("repeat_password")
     @classmethod
@@ -15,13 +28,27 @@ class UserCreate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    login: str
-    password: str
+    login: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        pattern=LOGIN_REGEX,
+        example="johndoe",
+    )
+    password: str = Field(
+        ..., min_length=6, max_length=128, example="strongpassword"
+    )
 
 
 class UserResponse(BaseModel):
-    id: int
-    login: str
+    id: int = Field(..., ge=1, example=1)
+    login: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        pattern=LOGIN_REGEX,
+        example="johndoe",
+    )
 
     class Config:
         from_attributes = True
