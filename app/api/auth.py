@@ -48,5 +48,9 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
             detail=("Incorrect login or password"),
         )
 
-    access_token = create_access_token(data={"sub": user.id})
+    from datetime import timedelta
+
+    access_token = create_access_token(
+        data={"sub": user.id}, expires_delta=timedelta(hours=1)
+    )
     return {"access_token": access_token, "token_type": "bearer"}

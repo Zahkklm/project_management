@@ -12,13 +12,19 @@ from fastapi import (
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
-from app.api.projects import check_project_access
+from app.api.deps import get_current_user, require_project_role
 from app.core.database import get_db
 from app.models.document import Document
 from app.models.user import User
 from app.schemas.document import DocumentResponse
-from app.services.s3_service import s3_service
+from app.services.s3_service_refactored import S3Service
+
+s3_service = S3Service()
+
+# Error message constants
+DOCUMENT_NOT_FOUND = "Document not found"
+
+s3_service = S3Service()
 
 router = APIRouter()
 
@@ -31,7 +37,7 @@ def get_project_documents(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    check_project_access(project_id, current_user, db)
+    require_project_role(project_id, db, current_user)
     documents = (
         db.query(Document).filter(Document.project_id == project_id).all()
     )
@@ -49,21 +55,18 @@ async def upload_documents(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    check_project_access(project_id, current_user, db)
-
+    require_project_role(project_id, db, current_user)
     uploaded_documents = []
     for file in files:
         content = await file.read()
         s3_key = s3_service.upload_file(
             content, str(file.filename or ""), str(file.content_type or "")
         )
-
         if not s3_key:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=(f"Failed to upload {file.filename}"),
             )
-
         document = Document(
             filename=str(file.filename),
             s3_key=str(s3_key),
@@ -73,11 +76,9 @@ async def upload_documents(
         )
         db.add(document)
         uploaded_documents.append(document)
-
     db.commit()
     for doc in uploaded_documents:
         db.refresh(doc)
-
     return uploaded_documents
 
 
@@ -88,22 +89,22 @@ async def download_document(
     db: Session = Depends(get_db),
 ):
     document = db.query(Document).filter(Document.id == document_id).first()
-
     if not document:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found",
+            detail=DOCUMENT_NOT_FOUND,
         )
+    require_project_role(int(document.project_id), db, current_user)
+    from app.core.config import settings
 
-    check_project_access(int(document.project_id), current_user, db)
-
-    file_content = s3_service.download_file(str(document.s3_key))
+    file_content = s3_service.download_file(
+        settings.S3_BUCKET_NAME, str(document.s3_key)
+    )
     if not file_content:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to download document",
         )
-
     return StreamingResponse(
         io.BytesIO(file_content),
         media_type=str(document.content_type),
@@ -123,36 +124,30 @@ async def update_document(
     db: Session = Depends(get_db),
 ):
     document = db.query(Document).filter(Document.id == document_id).first()
-
     if not document:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found",
+            detail=DOCUMENT_NOT_FOUND,
         )
+    require_project_role(int(document.project_id), db, current_user)
+    from app.core.config import settings
 
-    check_project_access(int(document.project_id), current_user, db)
-
-    s3_service.delete_file(str(document.s3_key))
-
+    s3_service.delete_file(settings.S3_BUCKET_NAME, str(document.s3_key))
     content = await file.read()
     s3_key = s3_service.upload_file(
         content, str(file.filename or ""), str(file.content_type or "")
     )
-
     if not s3_key:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to upload document",
         )
-
     setattr(document, "filename", str(file.filename))
     setattr(document, "s3_key", str(s3_key))
     setattr(document, "content_type", str(file.content_type))
     setattr(document, "size", int(len(content)))
-
     db.commit()
     db.refresh(document)
-
     return document
 
 
@@ -165,15 +160,14 @@ def delete_document(
     db: Session = Depends(get_db),
 ):
     document = db.query(Document).filter(Document.id == document_id).first()
-
     if not document:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Document not found",
+            detail=DOCUMENT_NOT_FOUND,
         )
+    require_project_role(int(document.project_id), db, current_user)
+    from app.core.config import settings
 
-    check_project_access(int(document.project_id), current_user, db)
-
-    s3_service.delete_file(str(document.s3_key))
+    s3_service.delete_file(settings.S3_BUCKET_NAME, str(document.s3_key))
     db.delete(document)
     db.commit()
