@@ -52,5 +52,5 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-#localstack
+# Localstack
 .localstack/cache

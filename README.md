@@ -214,14 +214,24 @@ def lambda_handler(event, context):
     return {'statusCode': 200}
 ```
 
-## Security Best Practices
 
-- JWT tokens expire after 1 hour
-- Passwords are hashed using bcrypt
-- All endpoints (except auth/login) require authentication
-- Role-based access control (owner/participant)
-- Input validation with Pydantic
-- SQL injection prevention via SQLAlchemy ORM
+## Data Normalization & Denormalization
+
+### Normalization
+The database schema is normalized for efficient storage and integrity:
+- **Users**: Each user is stored once in the `user` table.
+- **Projects**: Each project is stored in the `project` table, with an `owner_id` foreign key.
+- **Documents**: Each document is stored in the `document` table, linked to a project via `project_id`.
+- **Access Control**: The `project_access` table links users to projects with roles (owner/participant).
+
+This approach avoids data duplication and ensures referential integrity.
+
+### Denormalization
+If required for performance (e.g., reporting, analytics), denormalized views or tables can be added. For example:
+- Caching document counts per project
+- Storing user/project summary info in a reporting table
+
+Currently, all API responses are normalized, but denormalization can be added as needed for specific use cases.
 
 ## License
 

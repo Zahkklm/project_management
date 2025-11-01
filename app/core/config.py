@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = "test"
     AWS_REGION: str = "us-east-1"
     S3_BUCKET_NAME: str = "test-bucket"
+    S3_ENDPOINT_URL: str = "http://localhost:4566"
 
     PROJECT_NAME: str = "Project Management API"
     VERSION: str = "0.1.0"
