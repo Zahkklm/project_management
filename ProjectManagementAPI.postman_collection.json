@@ -18,7 +18,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"string\",\n  \"password\": \"string\"\n}"
+              "raw": "{\n  \"login\": \"alice\",\n  \"password\": \"SuperSecret123!\",\n  \"repeat_password\": \"SuperSecret123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth",
@@ -29,6 +29,18 @@
         },
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', jsonData.access_token);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -36,7 +48,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"string\",\n  \"password\": \"string\"\n}"
+              "raw": "{\n  \"login\": \"alice\",\n  \"password\": \"SuperSecret123!\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/login",
@@ -60,7 +72,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\"\n}"
+              "raw": "{\n  \"name\": \"Project Alpha\",\n  \"description\": \"First project for Alice\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/projects",
@@ -107,7 +119,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\"\n}"
+              "raw": "{\n  \"name\": \"Project Alpha Updated\",\n  \"description\": \"Updated description\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/project/:project_id/info",
@@ -140,7 +152,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"user\": \"string\"\n}"
+              "raw": "{\n  \"user\": \"bob\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/project/:project_id/invite",
@@ -161,7 +173,7 @@
               "host": ["{{base_url}}"],
               "path": ["project", ":project_id", "share"],
               "query": [
-                { "key": "with_email", "value": "string" }
+                { "key": "with_email", "value": "bob@example.com" }
               ]
             }
           }
