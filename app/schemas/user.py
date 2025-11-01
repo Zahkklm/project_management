@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
 
-
 LOGIN_REGEX = r"^[a-zA-Z0-9_.-]+$"
 
 
