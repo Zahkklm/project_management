@@ -19,12 +19,14 @@ from app.models.user import User
 from app.schemas.document import DocumentResponse
 from app.services.s3_service_refactored import S3Service
 
-s3_service = S3Service()
+
+def get_s3_service():
+    return S3Service()
+
 
 # Error message constants
 DOCUMENT_NOT_FOUND = "Document not found"
 
-s3_service = S3Service()
 
 router = APIRouter()
 
@@ -56,7 +58,37 @@ async def upload_documents(
     db: Session = Depends(get_db),
 ):
     require_project_role(project_id, db, current_user)
+    from app.core.config import settings
+
+    # Calculate current total project file size
+    current_total_size = (
+        db.query(Document)
+        .filter(Document.project_id == project_id)
+        .with_entities(Document.size)
+        .all()
+    )
+    current_total_size = sum(doc.size or 0 for doc in current_total_size)
+    new_files_size = 0
+    for file in files:
+        content = await file.read()
+        new_files_size += len(content)
+        await file.seek(0)  # Reset file pointer for second read
+    if (
+        current_total_size + new_files_size
+        > settings.PROJECT_FILE_SIZE_LIMIT
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Project file size limit exceeded. "
+                "Limit: {settings.PROJECT_FILE_SIZE_LIMIT} bytes. "
+                f"Current: {current_total_size} bytes. "
+                f"Attempted upload size: {new_files_size} bytes."
+            ),
+        )
+
     uploaded_documents = []
+    s3_service = get_s3_service()
     for file in files:
         content = await file.read()
         s3_key = s3_service.upload_file(
@@ -97,6 +129,7 @@ async def download_document(
     require_project_role(int(document.project_id), db, current_user)
     from app.core.config import settings
 
+    s3_service = get_s3_service()
     file_content = s3_service.download_file(
         settings.S3_BUCKET_NAME, str(document.s3_key)
     )
@@ -110,7 +143,7 @@ async def download_document(
         media_type=str(document.content_type),
         headers={
             "Content-Disposition": (
-                f"attachment; filename={str(document.filename)}"
+                f"attachment; filename=" f"{str(document.filename)}"
             )
         },
     )
@@ -132,6 +165,7 @@ async def update_document(
     require_project_role(int(document.project_id), db, current_user)
     from app.core.config import settings
 
+    s3_service = get_s3_service()
     s3_service.delete_file(settings.S3_BUCKET_NAME, str(document.s3_key))
     content = await file.read()
     s3_key = s3_service.upload_file(
@@ -168,6 +202,7 @@ def delete_document(
     require_project_role(int(document.project_id), db, current_user)
     from app.core.config import settings
 
+    s3_service = get_s3_service()
     s3_service.delete_file(settings.S3_BUCKET_NAME, str(document.s3_key))
     db.delete(document)
     db.commit()
