@@ -78,7 +78,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: test
           S3_BUCKET_NAME: test-bucket
         run: |
-          poetry install --with dev
+          poetry install --with dev --no-root
           tox -e py310
 
       - name: Upload coverage
