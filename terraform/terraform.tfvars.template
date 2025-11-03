@@ -1,0 +1,87 @@
+# Terraform Variables Configuration
+# Copy this to terraform.tfvars and fill in your values
+
+# ========================================
+# REQUIRED VARIABLES (You MUST change these)
+# ========================================
+
+# S3 Bucket Name - MUST be globally unique across ALL AWS accounts
+# Rules: lowercase letters, numbers, hyphens only (no underscores or periods)
+# Examples: "yourname-project-mgmt-2024", "company-fastapi-docs-prod"
+s3_bucket_name = "CHANGE-ME-your-unique-bucket-name-here"
+
+# Database Username
+# Rules: 1-16 alphanumeric characters, cannot be "admin", "root", or "postgres"
+# Example: "dbadmin", "proj_mgmt_admin"
+db_username = "dbadmin"
+
+# Database Password - MUST be strong!
+# Rules: Minimum 8 characters, must include uppercase, lowercase, number, and special character
+# Example: "MySecure2024!DB#Pass"
+# ⚠️  KEEP THIS SECRET - Never commit to git!
+db_password = "CHANGE-ME-strong-password-here"
+
+# Email for sending invitations
+# MUST be verified in AWS SES after deployment
+# Use your personal email for testing (e.g., "your.email@gmail.com")
+# Use domain email for production (e.g., "noreply@yourcompany.com")
+ses_sender_email = "CHANGE-ME-your.email@example.com"
+
+# ========================================
+# OPTIONAL VARIABLES (Have sensible defaults)
+# ========================================
+
+# AWS Region - where to deploy infrastructure
+# Default: "us-east-1" (cheapest region)
+# Other options: "us-west-2", "eu-west-1", "ap-southeast-1"
+aws_region = "us-east-1"
+
+# Environment name - used for tagging resources
+# Options: "dev", "staging", "production"
+environment = "dev"
+
+# Database Instance Size
+# Default: "db.t3.micro" ($15/month)
+# Options: "db.t3.small" ($30/month), "db.t3.medium" ($60/month)
+db_instance_class = "db.t3.micro"
+
+# ECS Task CPU (in CPU units)
+# Default: "256" (0.25 vCPU)
+# Options: "256", "512", "1024", "2048"
+ecs_task_cpu = "256"
+
+# ECS Task Memory (in MB)
+# Default: "512" MB
+# Must be compatible with CPU:
+#   256 CPU: 512, 1024, 2048 MB
+#   512 CPU: 1024, 2048, 3072, 4096 MB
+ecs_task_memory = "512"
+
+# Number of ECS Tasks to run
+# Default: 2 (for high availability)
+# Use 1 for dev/testing to save costs (~$15/month savings)
+# Use 2+ for production
+ecs_service_desired_count = 2
+
+# Frontend Application URL (used in email invitation links)
+# Development: "http://localhost:3000"
+# Production: "https://app.yourcompany.com"
+frontend_url = "http://localhost:3000"
+
+# ========================================
+# QUICK START CHECKLIST
+# ========================================
+# 
+# 1. Replace all "CHANGE-ME" values above
+# 2. Ensure S3 bucket name is globally unique
+# 3. Use a strong database password (min 8 chars, uppercase, lowercase, number, special char)
+# 4. Use an email address you can access (will need to verify it in AWS SES)
+# 5. Save this file as "terraform.tfvars" in the terraform/ directory
+# 6. Run: terraform init
+# 7. Run: terraform plan
+# 8. Run: terraform apply
+# 9. Verify your SES email:
+#    aws ses verify-email-identity --email-address your.email@example.com --region us-east-1
+# 10. Check your inbox and click the verification link
+#
+# Cost Estimate: ~$90-100/month with default settings
