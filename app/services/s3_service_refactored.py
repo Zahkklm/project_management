@@ -36,8 +36,9 @@ class S3Service(S3ServiceInterface):
         self, content: bytes, filename: str, content_type: str
     ) -> str:
         """Upload file content to S3 bucket."""
-        from app.core.config import settings
         import uuid
+
+        from app.core.config import settings
 
         s3 = self._get_client()
         # Generate unique S3 key
