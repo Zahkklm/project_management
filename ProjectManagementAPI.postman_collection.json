@@ -1,42 +1,32 @@
 {
   "info": {
     "name": "Project Management API",
-    "description": "Postman collection for FastAPI project management backend.",
+    "description": "Complete API collection for Project Management System with authentication, projects, and document management.\n\n## Quick Start\n1. Set `base_url` variable (default: http://localhost:8000)\n2. Run 'Register User' to create account\n3. Run 'Login' to get JWT token (auto-saved)\n4. Use other endpoints with authentication\n\n## Features\n- JWT Authentication (1-hour expiration)\n- Project CRUD operations\n- Document upload/download (PDF, DOCX)\n- User invitations\n- Role-based access (owner/participant)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "item": [
     {
       "name": "Auth",
+      "description": "User authentication endpoints",
       "item": [
         {
           "name": "Register User",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"login\": \"alice\",\n  \"password\": \"SuperSecret123!\",\n  \"repeat_password\": \"SuperSecret123!\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/auth",
-              "host": ["{{base_url}}"],
-              "path": ["auth"]
-            }
-          }
-        },
-        {
-          "name": "Login",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.collectionVariables.set('access_token', jsonData.access_token);"
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('User created with login', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('login');",
+                  "    pm.expect(jsonData).to.have.property('email');",
+                  "});"
                 ]
               }
             }
@@ -48,22 +38,89 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"alice\",\n  \"password\": \"SuperSecret123!\"\n}"
+              "raw": "{\n  \"login\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth",
+              "host": ["{{base_url}}"],
+              "path": ["auth"]
+            },
+            "description": "Create a new user account.\n\n**Request Body:**\n- `login` (string, required): Username (3-50 chars)\n- `email` (string, required): Valid email address\n- `password` (string, required): Password (min 8 chars)\n\n**Response:** User object with id, login, and email"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Token received', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('access_token');",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "username", "value": "alice", "type": "text" },
+                { "key": "password", "value": "SecurePass123!", "type": "text" }
+              ]
             },
             "url": {
               "raw": "{{base_url}}/login",
               "host": ["{{base_url}}"],
               "path": ["login"]
-            }
+            },
+            "description": "Login and receive JWT token (valid for 1 hour).\n\n**Form Data:**\n- `username`: Your login username\n- `password`: Your password\n\n**Response:** JWT access token (auto-saved to collection variable)\n\n**Note:** Token is automatically used in subsequent requests"
           }
         }
       ]
     },
     {
       "name": "Projects",
+      "description": "Project management endpoints",
       "item": [
         {
           "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Project created', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.collectionVariables.set('project_id', jsonData.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -72,13 +129,19 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Project Alpha\",\n  \"description\": \"First project for Alice\"\n}"
+              "raw": "{\n  \"name\": \"Website Redesign\",\n  \"description\": \"Complete redesign of company website with modern UI/UX\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/projects",
               "host": ["{{base_url}}"],
               "path": ["projects"]
-            }
+            },
+            "description": "Create a new project (you become the owner).\n\n**Request Body:**\n- `name` (string, required): Project name\n- `description` (string, required): Project description\n\n**Response:** Created project with id, owner_id, and timestamps\n\n**Note:** Project ID is auto-saved for subsequent requests"
           }
         },
         {
@@ -92,7 +155,8 @@
               "raw": "{{base_url}}/projects",
               "host": ["{{base_url}}"],
               "path": ["projects"]
-            }
+            },
+            "description": "Get all projects you own or have access to.\n\n**Response:** Array of projects with role information\n- `role`: 'owner' or 'participant'\n\n**Use Case:** Dashboard view of all accessible projects"
           }
         },
         {
@@ -103,10 +167,14 @@
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/project/:project_id/info",
+              "raw": "{{base_url}}/project/{{project_id}}/info",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "info"]
-            }
+              "path": ["project", "{{project_id}}", "info"],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Get detailed information about a specific project.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Response:** Project details including name, description, owner, timestamps\n\n**Access:** Owner or participant"
           }
         },
         {
@@ -119,13 +187,22 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Project Alpha Updated\",\n  \"description\": \"Updated description\"\n}"
+              "raw": "{\n  \"name\": \"Website Redesign - Phase 2\",\n  \"description\": \"Updated scope: Mobile-first responsive design with accessibility features\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
-              "raw": "{{base_url}}/project/:project_id/info",
+              "raw": "{{base_url}}/project/{{project_id}}/info",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "info"]
-            }
+              "path": ["project", "{{project_id}}", "info"],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Update project name and/or description.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Request Body:**\n- `name` (string, optional): New project name\n- `description` (string, optional): New description\n\n**Access:** Owner only"
           }
         },
         {
@@ -136,29 +213,35 @@
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/project/:project_id",
+              "raw": "{{base_url}}/project/{{project_id}}",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id"]
-            }
+              "path": ["project", "{{project_id}}"],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Delete a project and all its documents.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Access:** Owner only\n\n**Warning:** This action cannot be undone. All documents will be deleted from S3."
           }
         },
         {
-          "name": "Invite User",
+          "name": "Invite User to Project",
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"user\": \"bob\"\n}"
-            },
             "url": {
-              "raw": "{{base_url}}/project/:project_id/invite",
+              "raw": "{{base_url}}/project/{{project_id}}/invite?user=bob",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "invite"]
-            }
+              "path": ["project", "{{project_id}}", "invite"],
+              "query": [
+                { "key": "user", "value": "bob", "description": "Username to invite" }
+              ],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Invite a user to collaborate on your project.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Query Parameter:**\n- `user`: Username (login) of user to invite\n\n**Access:** Owner only\n\n**Note:** User must already be registered"
           }
         },
         {
@@ -169,36 +252,85 @@
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/project/:project_id/share?with_email=string",
+              "raw": "{{base_url}}/project/{{project_id}}/share?with_email=bob@example.com",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "share"],
+              "path": ["project", "{{project_id}}", "share"],
               "query": [
-                { "key": "with_email", "value": "bob@example.com" }
+                { "key": "with_email", "value": "bob@example.com", "description": "Email address to send invitation" }
+              ],
+              "variable": [
+                { "key": "project_id", "value": "1" }
               ]
-            }
+            },
+            "description": "Send email invitation with join link.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Query Parameter:**\n- `with_email`: Email address to send invitation\n\n**Access:** Owner only\n\n**Note:** Requires AWS SES configuration. Email contains join link valid for 7 days."
+          }
+        },
+        {
+          "name": "Join Project via Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/join?token=abc123&project_id=1",
+              "host": ["{{base_url}}"],
+              "path": ["join"],
+              "query": [
+                { "key": "token", "value": "abc123", "description": "Invitation token from email" },
+                { "key": "project_id", "value": "1", "description": "Project ID" }
+              ]
+            },
+            "description": "Join a project using invitation token from email.\n\n**Query Parameters:**\n- `token`: Invitation token (from email link)\n- `project_id`: Project ID\n\n**Response:** Success message\n\n**Note:** Token expires after 7 days or first use"
           }
         }
       ]
     },
     {
       "name": "Documents",
+      "description": "Document management endpoints",
       "item": [
         {
-          "name": "List Documents",
+          "name": "List Project Documents",
           "request": {
             "method": "GET",
             "header": [
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/project/:project_id/documents",
+              "raw": "{{base_url}}/project/{{project_id}}/documents",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "documents"]
-            }
+              "path": ["project", "{{project_id}}", "documents"],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Get all documents in a project.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Response:** Array of documents with:\n- `id`, `filename`, `size`, `content_type`\n- `uploaded_by`, `uploaded_at`\n- `s3_key` (for internal use)\n\n**Access:** Owner or participant"
           }
         },
         {
           "name": "Upload Documents",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Documents uploaded', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.collectionVariables.set('document_id', jsonData[0].id);",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -207,14 +339,23 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "files", "type": "file", "src": "" }
+                { 
+                  "key": "files", 
+                  "type": "file", 
+                  "src": "",
+                  "description": "Select one or more files (PDF, DOCX, images)"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/project/:project_id/documents",
+              "raw": "{{base_url}}/project/{{project_id}}/documents",
               "host": ["{{base_url}}"],
-              "path": ["project", ":project_id", "documents"]
-            }
+              "path": ["project", "{{project_id}}", "documents"],
+              "variable": [
+                { "key": "project_id", "value": "1" }
+              ]
+            },
+            "description": "Upload one or more documents to a project.\n\n**Path Parameter:**\n- `project_id`: ID of the project\n\n**Form Data:**\n- `files`: One or more files (multipart/form-data)\n\n**Supported Formats:**\n- Documents: PDF, DOCX, TXT\n- Images: PNG, JPG, JPEG, GIF\n\n**Storage:** Files stored in AWS S3 with versioning\n\n**Lambda Processing:** Images automatically resized to 800x800\n\n**Access:** Owner or participant"
           }
         },
         {
@@ -225,10 +366,14 @@
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/document/:document_id",
+              "raw": "{{base_url}}/document/{{document_id}}",
               "host": ["{{base_url}}"],
-              "path": ["document", ":document_id"]
-            }
+              "path": ["document", "{{document_id}}"],
+              "variable": [
+                { "key": "document_id", "value": "1" }
+              ]
+            },
+            "description": "Download a document.\n\n**Path Parameter:**\n- `document_id`: ID of the document\n\n**Response:** File binary data with appropriate Content-Type header\n\n**Headers:**\n- `Content-Disposition`: attachment; filename=\"...\"\n- `Content-Type`: Original file MIME type\n\n**Access:** Owner or participant of the project"
           }
         },
         {
@@ -241,14 +386,23 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "file", "type": "file", "src": "" }
+                { 
+                  "key": "file", 
+                  "type": "file", 
+                  "src": "",
+                  "description": "New file to replace existing document"
+                }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/document/:document_id",
+              "raw": "{{base_url}}/document/{{document_id}}",
               "host": ["{{base_url}}"],
-              "path": ["document", ":document_id"]
-            }
+              "path": ["document", "{{document_id}}"],
+              "variable": [
+                { "key": "document_id", "value": "1" }
+              ]
+            },
+            "description": "Replace an existing document with a new file.\n\n**Path Parameter:**\n- `document_id`: ID of the document\n\n**Form Data:**\n- `file`: New file (single file)\n\n**Note:** Old file is deleted from S3, new file uploaded\n\n**Access:** Owner or participant of the project"
           }
         },
         {
@@ -259,16 +413,21 @@
               { "key": "Authorization", "value": "Bearer {{access_token}}" }
             ],
             "url": {
-              "raw": "{{base_url}}/document/:document_id",
+              "raw": "{{base_url}}/document/{{document_id}}",
               "host": ["{{base_url}}"],
-              "path": ["document", ":document_id"]
-            }
+              "path": ["document", "{{document_id}}"],
+              "variable": [
+                { "key": "document_id", "value": "1" }
+              ]
+            },
+            "description": "Delete a document.\n\n**Path Parameter:**\n- `document_id`: ID of the document\n\n**Action:** Deletes file from S3 and database record\n\n**Access:** Owner or participant of the project\n\n**Warning:** This action cannot be undone"
           }
         }
       ]
     },
     {
-      "name": "Misc",
+      "name": "Health & Info",
+      "description": "System health and information endpoints",
       "item": [
         {
           "name": "Root",
@@ -278,7 +437,8 @@
               "raw": "{{base_url}}/",
               "host": ["{{base_url}}"],
               "path": [""]
-            }
+            },
+            "description": "API root endpoint.\n\n**Response:** API name and version\n\n**Use Case:** Verify API is accessible"
           }
         },
         {
@@ -289,14 +449,45 @@
               "raw": "{{base_url}}/health",
               "host": ["{{base_url}}"],
               "path": ["health"]
-            }
+            },
+            "description": "Health check endpoint.\n\n**Response:** { \"status\": \"healthy\" }\n\n**Use Case:** Monitoring, load balancer health checks"
+          }
+        },
+        {
+          "name": "API Documentation",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/docs",
+              "host": ["{{base_url}}"],
+              "path": ["docs"]
+            },
+            "description": "Interactive API documentation (Swagger UI).\n\n**Access:** Open in browser\n\n**Features:**\n- Try out endpoints\n- View request/response schemas\n- Authentication support"
           }
         }
       ]
     }
   ],
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8000" },
-    { "key": "access_token", "value": "" }
+    { 
+      "key": "base_url", 
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    { 
+      "key": "access_token", 
+      "value": "",
+      "type": "string"
+    },
+    { 
+      "key": "project_id", 
+      "value": "1",
+      "type": "string"
+    },
+    { 
+      "key": "document_id", 
+      "value": "1",
+      "type": "string"
+    }
   ]
 }
