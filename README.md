@@ -10,9 +10,12 @@ A FastAPI-based project management system with document storage, user authentica
 - **Project Management**: Create, update, delete, and share projects
 - **Document Management**: Upload, download, update, and delete documents (PDF, DOCX)
 - **Access Control**: Owner and participant roles with different permissions
-- **AWS S3 Integration**: Secure document storage
+- **Email Invitations**: AWS SES integration for sending project invitations
+- **AWS S3 Integration**: Secure document storage with versioning
 - **PostgreSQL Database**: Robust data persistence with SQLAlchemy ORM
+- **AWS Lambda**: Automated image processing on upload
 - **Docker Support**: Containerized application with docker-compose
+- **CI/CD Pipeline**: Automated testing, building, and deployment
 
 ## Tech Stack
 
@@ -134,6 +137,8 @@ project_management/
 - `PUT /project/{project_id}/info` - Update project details
 - `DELETE /project/{project_id}` - Delete project (owner only)
 - `POST /project/{project_id}/invite?user={login}` - Invite user to project
+- `GET /project/{project_id}/share?with_email={email}` - Send email invitation
+- `POST /join?token={token}&project_id={id}` - Join project via invitation link
 
 ### Documents
 - `GET /project/{project_id}/documents` - Get all project documents
@@ -160,9 +165,25 @@ pytest tests/test_auth.py -v
 The GitHub Actions workflow includes:
 
 1. **Linting**: Black, isort, Flake8
-2. **Testing**: pytest with coverage reporting
-3. **Building**: Docker image build and push to GitHub Container Registry
-4. **Deployment**: Automated deployment on merge to main
+2. **Testing**: pytest with coverage reporting (31 tests, 53% coverage)
+3. **Building**: Docker image build and push to Amazon ECR
+4. **Deployment**: Automated deployment to AWS ECS on merge to main
+
+See [GitHub Secrets Configuration](.github/SECRETS.md) for setup instructions.
+
+## AWS Deployment
+
+The application is deployed to AWS using Terraform with the following infrastructure:
+
+- **ECS Fargate**: Serverless container orchestration
+- **Application Load Balancer**: Traffic distribution
+- **RDS PostgreSQL**: Managed database
+- **S3**: Document storage with versioning
+- **Lambda**: Image processing
+- **SES**: Email service for invitations
+- **VPC**: Isolated network with public/private subnets
+
+See [AWS Deployment Guide](AWS_DEPLOYMENT.md) for complete deployment instructions.
 
 ## Database Migrations
 

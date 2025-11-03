@@ -29,3 +29,11 @@ class Project(Base):
         back_populates="project",
         cascade="all, delete-orphan",
     )
+    invite_tokens = relationship(
+        "InviteToken",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+    report = relationship(
+        "ProjectReport", back_populates="project", uselist=False
+    )

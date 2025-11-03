@@ -15,6 +15,14 @@ class Settings(BaseSettings):
     S3_BUCKET_NAME: str = "test-bucket"
     S3_ENDPOINT_URL: str = "http://localhost:4566"
 
+    # SES Email Settings
+    SES_SENDER_EMAIL: str = "noreply@example.com"
+    SES_AWS_REGION: str = "us-east-1"
+    USE_MOCK_EMAIL: bool = True  # Set to False in production
+
+    # Frontend URL for email links
+    FRONTEND_URL: str = "http://localhost:3000"
+
     PROJECT_NAME: str = "Project Management API"
     VERSION: str = "0.1.0"
     DEBUG: bool = False
@@ -23,6 +31,8 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = "password"
     POSTGRES_DB: str = "project_management"
     POSTGRES_PORT: str = "5432"
+
+    PROJECT_FILE_SIZE_LIMIT: int = 100_000_000  # 100 MB default
 
     class Config:
         env_file = ".env"
