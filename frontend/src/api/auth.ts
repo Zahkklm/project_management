@@ -19,10 +19,5 @@ export const authApi = {
       repeat_password: data.password
     })
     return response.data
-  },
-
-  getCurrentUser: async () => {
-    const response = await apiClient.get<User>('/auth/me')
-    return response.data
   }
 }

@@ -10,9 +10,9 @@ export const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: async (data) => {
-      const user = await authApi.getCurrentUser()
-      setAuth(data.access_token, user)
+    onSuccess: (data) => {
+      // Store token and minimal user info
+      setAuth(data.access_token, { id: 0, login: '', email: '' })
       navigate('/projects')
     }
   })
