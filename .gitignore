@@ -59,3 +59,13 @@ Thumbs.db
 *.md
 **/*.md
 !README.md
+
+# Lambda package artifact
+lambda_function.zip
+
+# Terraform local state and lock files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
