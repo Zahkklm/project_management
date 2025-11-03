@@ -38,7 +38,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"login\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+              "raw": "{\n  \"login\": \"alice\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"repeat_password\": \"SecurePass123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -50,7 +50,7 @@
               "host": ["{{base_url}}"],
               "path": ["auth"]
             },
-            "description": "Create a new user account.\n\n**Request Body:**\n- `login` (string, required): Username (3-50 chars)\n- `email` (string, required): Valid email address\n- `password` (string, required): Password (min 8 chars)\n\n**Response:** User object with id, login, and email"
+            "description": "Create a new user account.\n\n**Request Body:**\n- `login` (string, required): Username (3-50 chars)\n- `email` (string, required): Valid email address\n- `password` (string, required): Password (min 6 chars)\n- `repeat_password` (string, required): Must match password\n\n**Response:** User object with id, login, and email"
           }
         },
         {

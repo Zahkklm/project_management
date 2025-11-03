@@ -14,7 +14,10 @@ export const authApi = {
   },
 
   register: async (data: RegisterRequest) => {
-    const response = await apiClient.post<User>('/auth', data)
+    const response = await apiClient.post<User>('/auth', {
+      ...data,
+      repeat_password: data.password
+    })
     return response.data
   },
 
