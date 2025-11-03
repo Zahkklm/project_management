@@ -54,3 +54,8 @@ Thumbs.db
 
 # Localstack
 .localstack/cache
+
+# Docs: ignore Markdown files except the root README.md
+*.md
+**/*.md
+!README.md
