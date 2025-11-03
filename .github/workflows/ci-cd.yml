@@ -69,11 +69,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
-      - name: Install dependencies with Poetry
-        run: |
-          poetry install --no-interaction --no-root
 
-      - name: Run tests
+      - name: Run tests with tox
         env:
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
           SECRET_KEY: test-secret-key
@@ -81,7 +78,8 @@ jobs:
           AWS_SECRET_ACCESS_KEY: test
           S3_BUCKET_NAME: test-bucket
         run: |
-          poetry run pytest tests/ -v --cov=app --cov-report=xml --cov-report=term-missing
+          poetry install --with dev
+          tox -e py310
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
