@@ -1,0 +1,13 @@
+{
+  "name": "project-management",
+  "version": "1.0.0",
+  "description": "Full-stack project management system",
+  "scripts": {
+    "install:frontend": "cd frontend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose up --build"
+  }
+}
