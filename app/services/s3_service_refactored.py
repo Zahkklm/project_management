@@ -32,11 +32,29 @@ class S3Service(S3ServiceInterface):
 
         return boto3.client(**client_kwargs)
 
-    def upload_file(self, file_path: str, bucket: str, key: str) -> str:  # type: ignore[override]
+    def upload_file(  # type: ignore[override]
+        self, content: bytes, filename: str, content_type: str
+    ) -> str:
+        """Upload file content to S3 bucket."""
+        from app.core.config import settings
+        import uuid
+
         s3 = self._get_client()
-        with open(file_path, "rb") as f:
-            s3.put_object(Bucket=bucket, Key=key, Body=f.read())
-        return key
+        # Generate unique S3 key
+        file_extension = filename.split(".")[-1] if "." in filename else ""
+        s3_key = (
+            f"{uuid.uuid4()}.{file_extension}"
+            if file_extension
+            else str(uuid.uuid4())
+        )
+
+        s3.put_object(
+            Bucket=settings.S3_BUCKET_NAME,
+            Key=s3_key,
+            Body=content,
+            ContentType=content_type,
+        )
+        return s3_key
 
     def download_file(self, bucket: str, key: str) -> bytes:
         s3 = self._get_client()

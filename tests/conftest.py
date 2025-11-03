@@ -2,7 +2,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from moto import mock_aws
+from moto import mock_s3
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -22,7 +22,7 @@ def aws_mocks():
     os.environ["AWS_ACCESS_KEY_ID"] = "test"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
     os.environ["AWS_REGION"] = "us-east-1"
-    with mock_aws():
+    with mock_s3():
         yield
     if old_endpoint is not None:
         os.environ["S3_ENDPOINT_URL"] = old_endpoint

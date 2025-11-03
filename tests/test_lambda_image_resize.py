@@ -1,13 +1,13 @@
 import io
 
 import boto3
-from moto import mock_aws
+from moto import mock_s3
 from PIL import Image
 
 from app.services.lambda_image_resize import lambda_handler
 
 
-@mock_aws
+@mock_s3
 def test_lambda_image_resize(tmp_path):
     s3 = boto3.client(
         "s3",
