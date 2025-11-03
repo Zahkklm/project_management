@@ -700,6 +700,11 @@ resource "aws_cloudfront_distribution" "alb_https" {
 }
 
 output "cloudfront_domain_name" {
-  description = "CloudFront HTTPS domain name"
+  description = "CloudFront HTTPS domain name for API"
   value       = aws_cloudfront_distribution.alb_https.domain_name
+}
+
+output "api_url" {
+  description = "API URL"
+  value       = "https://${aws_cloudfront_distribution.alb_https.domain_name}"
 }

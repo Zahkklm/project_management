@@ -19,7 +19,8 @@ A FastAPI-based project management system with document storage, user authentica
 
 ## Tech Stack
 
-- **Backend**: Python 3.10, FastAPI
+### Backend
+- **Framework**: Python 3.10, FastAPI
 - **Database**: PostgreSQL 15
 - **ORM**: SQLAlchemy 2.0
 - **Authentication**: JWT (python-jose)
@@ -29,11 +30,20 @@ A FastAPI-based project management system with document storage, user authentica
 - **CI/CD**: GitHub Actions
 - **Containerization**: Docker, docker-compose
 
+### Frontend
+- **Framework**: React 18, TypeScript
+- **Build Tool**: Vite
+- **Routing**: React Router v6
+- **State Management**: Zustand, TanStack Query
+- **HTTP Client**: Axios
+- **Styling**: Inline CSS (minimal)
+- **Containerization**: Docker, Nginx
+
 ## Project Structure
 
 ```
 project_management/
-├── app/
+├── app/                  # Backend (FastAPI)
 │   ├── api/              # API endpoints
 │   │   ├── auth.py       # Authentication endpoints
 │   │   ├── projects.py   # Project management endpoints
@@ -43,23 +53,23 @@ project_management/
 │   │   ├── database.py   # Database connection
 │   │   └── security.py   # Security utilities
 │   ├── models/           # SQLAlchemy models
-│   │   ├── user.py
-│   │   ├── project.py
-│   │   ├── document.py
-│   │   └── project_access.py
 │   ├── schemas/          # Pydantic schemas
-│   │   ├── user.py
-│   │   ├── project.py
-│   │   └── document.py
 │   ├── services/         # Business logic
-│   │   └── s3_service.py
 │   └── main.py           # FastAPI application
+├── frontend/             # Frontend (React + Vite)
+│   ├── src/
+│   │   ├── api/          # API client
+│   │   ├── components/   # React components
+│   │   ├── pages/        # Page components
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── store/        # State management
+│   │   └── types/        # TypeScript types
+│   ├── Dockerfile
+│   └── package.json
 ├── tests/                # Test suite
 ├── alembic/              # Database migrations
 ├── .github/workflows/    # CI/CD pipelines
-├── Dockerfile
 ├── docker-compose.yml
-├── pyproject.toml
 └── requirements.txt
 ```
 
@@ -115,14 +125,24 @@ project_management/
    # Edit .env with your AWS credentials
    ```
 
-2. **Start services**
+2. **Install frontend dependencies**
+   ```bash
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+3. **Start services**
    ```bash
    docker-compose up -d
    ```
 
-3. **Access the API**
+4. **Access the application**
+   - Frontend: http://localhost:3000
    - API: http://localhost:8000
-   - Docs: http://localhost:8000/docs
+   - API Docs: http://localhost:8000/docs
+
+For detailed frontend setup, see [FRONTEND_SETUP.md](FRONTEND_SETUP.md)
 
 ## API Endpoints
 
