@@ -270,7 +270,7 @@ resource "aws_db_instance" "postgres" {
   engine               = "postgres"
   engine_version       = "15.14"
   instance_class       = var.db_instance_class
-  allocated_storage    = 20
+  allocated_storage    = 10
   storage_encrypted    = true
   db_name              = "project_management"
   username             = var.db_username
@@ -390,7 +390,7 @@ resource "aws_ecs_cluster" "main" {
 # CloudWatch Log Group
 resource "aws_cloudwatch_log_group" "app" {
   name              = "/ecs/project-management-app"
-  retention_in_days = 7
+  retention_in_days = 3
 
   tags = {
     Name        = "project-management-app-logs"

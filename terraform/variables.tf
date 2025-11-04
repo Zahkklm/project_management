@@ -48,7 +48,7 @@ variable "ecs_task_memory" {
 variable "ecs_service_desired_count" {
   description = "Desired number of ECS tasks"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "ses_sender_email" {

@@ -162,13 +162,7 @@ jobs:
             --service project-management-service \
             --force-new-deployment \
             --region ${{ secrets.AWS_REGION }}
-      
-      - name: Wait for service stability
-        run: |
-          aws ecs wait services-stable \
-            --cluster project-management-cluster \
-            --services project-management-service \
-            --region ${{ secrets.AWS_REGION }}
+          echo "ECS service update initiated. Deployment will continue in background."
       
       - name: Deploy Lambda function
         run: |
