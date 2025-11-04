@@ -11,9 +11,13 @@ export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
-      // Store token and minimal user info
+      console.log('Login successful, token received:', data.access_token?.substring(0, 20))
       setAuth(data.access_token, { id: 0, login: '', email: '' })
-      navigate('/projects')
+      console.log('Token stored, navigating to /projects')
+      navigate('/projects', { replace: true })
+    },
+    onError: (error) => {
+      console.error('Login failed:', error)
     }
   })
 
