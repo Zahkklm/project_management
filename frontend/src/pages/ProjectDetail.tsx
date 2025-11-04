@@ -26,7 +26,11 @@ export const ProjectDetail = () => {
     mutationFn: (login: string) => projectsApi.invite(projectId, login),
     onSuccess: () => {
       setInviteLogin('')
-      alert('User invited successfully')
+      alert('✅ User invited successfully!')
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.detail || 'Failed to invite user'
+      alert(`❌ ${message}`)
     }
   })
 
@@ -53,7 +57,11 @@ export const ProjectDetail = () => {
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault()
-    inviteMutation.mutate(inviteLogin)
+    if (!inviteLogin.trim()) {
+      alert('❌ Please enter a username')
+      return
+    }
+    inviteMutation.mutate(inviteLogin.trim())
   }
 
   return (
@@ -115,7 +123,10 @@ export const ProjectDetail = () => {
                     Download
                   </button>
                   <button
-                    onClick={() => deleteMutation.mutate(doc.id)}
+                    onClick={() => {
+                      if (window.confirm(`Delete "${doc.filename}"?`))
+                        deleteMutation.mutate(doc.id)
+                    }}
                     style={styles.deleteBtn}
                   >
                     Delete

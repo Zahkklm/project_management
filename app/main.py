@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, documents, join, projects
+from app.api import auth, documents, invitations, join, projects
 from app.core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
@@ -17,6 +17,7 @@ app.add_middleware(
 app.include_router(auth.router, tags=["auth"])
 app.include_router(projects.router, tags=["projects"])
 app.include_router(documents.router, tags=["documents"])
+app.include_router(invitations.router, tags=["invitations"])
 app.include_router(join.router, tags=["join"])
 
 

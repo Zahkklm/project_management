@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { projectsApi } from '../api/projects'
+import { apiClient } from '../api/client'
 import { Navbar } from '../components/Navbar'
 
 export const Projects = () => {
@@ -14,6 +15,37 @@ export const Projects = () => {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: projectsApi.getAll
+  })
+
+  const { data: invitations } = useQuery({
+    queryKey: ['invitations'],
+    queryFn: async () => {
+      const response = await apiClient.get('/invitations')
+      return response.data
+    }
+  })
+
+  const acceptInviteMutation = useMutation({
+    mutationFn: async ({ token, projectId }: { token: string; projectId: number }) => {
+      await apiClient.post(`/join?token=${token}&project_id=${projectId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      queryClient.invalidateQueries({ queryKey: ['invitations'] })
+      alert('✅ Invitation accepted!')
+    },
+    onError: (error: any) => {
+      alert(`❌ ${error.response?.data?.detail || 'Failed to accept invitation'}`)
+    }
+  })
+
+  const declineInviteMutation = useMutation({
+    mutationFn: async ({ token, projectId }: { token: string; projectId: number }) => {
+      await apiClient.post(`/join?token=${token}&project_id=${projectId}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] })
+    }
   })
 
   const createMutation = useMutation({
@@ -48,6 +80,42 @@ export const Projects = () => {
             Create Project
           </button>
         </div>
+
+        {invitations && invitations.length > 0 && (
+          <div style={styles.invitationsSection}>
+            <h2>Pending Invitations</h2>
+            <div style={styles.invitationsList}>
+              {invitations.map((inv: any) => (
+                <div key={inv.token} style={styles.invitationCard}>
+                  <div>
+                    <h3>{inv.project_name}</h3>
+                    <p style={styles.inviteExpiry}>
+                      Expires: {new Date(inv.expires_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div style={styles.inviteActions}>
+                    <button
+                      onClick={() => acceptInviteMutation.mutate({ token: inv.token, projectId: inv.project_id })}
+                      style={styles.acceptBtn}
+                      disabled={acceptInviteMutation.isPending}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Decline this invitation?'))
+                          declineInviteMutation.mutate({ token: inv.token, projectId: inv.project_id })
+                      }}
+                      style={styles.declineBtn}
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <p>Loading...</p>
@@ -241,6 +309,54 @@ const styles = {
   cancelBtn: {
     flex: 1,
     padding: '0.75rem',
+    backgroundColor: '#6c757d',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  },
+  invitationsSection: {
+    marginBottom: '2rem',
+    padding: '1.5rem',
+    backgroundColor: '#1a1a1a',
+    borderRadius: '8px',
+    border: '2px solid #ffc107'
+  },
+  invitationsList: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '1rem',
+    marginTop: '1rem'
+  },
+  invitationCard: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem',
+    backgroundColor: '#2a2a2a',
+    borderRadius: '4px',
+    border: '1px solid #ffc107'
+  },
+  inviteExpiry: {
+    color: '#aaa',
+    fontSize: '0.875rem',
+    marginTop: '0.25rem'
+  },
+  inviteActions: {
+    display: 'flex',
+    gap: '0.5rem'
+  },
+  acceptBtn: {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  declineBtn: {
+    padding: '0.5rem 1rem',
     backgroundColor: '#6c757d',
     color: '#fff',
     border: 'none',
