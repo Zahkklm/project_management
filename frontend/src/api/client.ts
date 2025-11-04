@@ -14,7 +14,8 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
-  console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, token ? 'with token' : 'no token')
+  const fullUrl = `${config.baseURL || ''}${config.url || ''}`
+  console.log(`API Request: ${config.method?.toUpperCase()} ${fullUrl}`, token ? 'with token' : 'no token')
   return config
 })
 
