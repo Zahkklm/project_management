@@ -270,7 +270,7 @@ resource "aws_db_instance" "postgres" {
   engine               = "postgres"
   engine_version       = "15.14"
   instance_class       = var.db_instance_class
-  allocated_storage    = 10
+  allocated_storage    = 20
   storage_encrypted    = true
   db_name              = "project_management"
   username             = var.db_username
