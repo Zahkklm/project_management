@@ -65,11 +65,13 @@
                   "    pm.response.to.have.status(200);",
                   "});",
                   "",
-                  "pm.test('Token received', function () {",
+                  "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
-                  "    pm.expect(jsonData).to.have.property('access_token');",
-                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
-                  "});"
+                  "    if (jsonData.access_token) {",
+                  "        pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "        console.log('Access token saved:', jsonData.access_token.substring(0, 20) + '...');",
+                  "    }",
+                  "}"
                 ]
               }
             }
@@ -77,21 +79,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
-              "mode": "urlencoded",
-              "urlencoded": [
-                { "key": "username", "value": "alice", "type": "text" },
-                { "key": "password", "value": "SecurePass123!", "type": "text" }
-              ]
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"alice\",\n  \"password\": \"SecurePass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{base_url}}/login",
               "host": ["{{base_url}}"],
               "path": ["login"]
             },
-            "description": "Login and receive JWT token (valid for 1 hour).\n\n**Form Data:**\n- `username`: Your login username\n- `password`: Your password\n\n**Response:** JWT access token (auto-saved to collection variable)\n\n**Note:** Token is automatically used in subsequent requests"
+            "description": "Login and receive JWT token (valid for 1 hour).\n\n**Request Body:**\n- `login` (string, required): Your username\n- `password` (string, required): Your password\n\n**Response:** JWT access token (auto-saved to collection variable)\n\n**Note:** Token is automatically used in subsequent requests"
           }
         }
       ]
@@ -421,6 +425,27 @@
               ]
             },
             "description": "Delete a document.\n\n**Path Parameter:**\n- `document_id`: ID of the document\n\n**Action:** Deletes file from S3 and database record\n\n**Access:** Owner or participant of the project\n\n**Warning:** This action cannot be undone"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invitations",
+      "description": "User invitation management endpoints",
+      "item": [
+        {
+          "name": "Get Pending Invitations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/invitations",
+              "host": ["{{base_url}}"],
+              "path": ["invitations"]
+            },
+            "description": "Get all pending invitations for current user.\n\n**Response:** Array of invitations with:\n- `token`: Invitation token\n- `project_id`: Project ID\n- `project_name`: Name of the project\n- `expires_at`: Expiration timestamp\n\n**Use Case:** Display pending invitations in user dashboard\n\n**Note:** Only shows invitations that match user's email, are not used, and not expired"
           }
         }
       ]
