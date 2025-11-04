@@ -20,7 +20,7 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`)
+    console.log(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url} - ${response.status}`, response.data)
     return response
   },
   (error) => {
