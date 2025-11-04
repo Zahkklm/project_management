@@ -1,46 +1,24 @@
-.PHONY: help install test lint format run docker-build docker-up docker-down migrate
+.PHONY: help local-up local-down aws-deploy frontend-dev
 
 help:
 	@echo "Available commands:"
-	@echo "  make install       - Install dependencies"
-	@echo "  make test          - Run tests"
-	@echo "  make lint          - Run linters"
-	@echo "  make format        - Format code"
-	@echo "  make run           - Run development server"
-	@echo "  make docker-build  - Build Docker image"
-	@echo "  make docker-up     - Start Docker containers"
-	@echo "  make docker-down   - Stop Docker containers"
-	@echo "  make migrate       - Run database migrations"
+	@echo "  make local-up       - Start LocalStack environment"
+	@echo "  make local-down     - Stop LocalStack environment"
+	@echo "  make frontend-dev   - Start frontend dev server"
+	@echo "  make aws-deploy     - Deploy to AWS"
 
-install:
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+local-up:
+	docker-compose -f docker-compose.localstack.yml up -d
+	@echo "LocalStack environment started"
+	@echo "API: http://localhost:8000"
+	@echo "LocalStack: http://localhost:4566"
 
-test:
-	pytest tests/ -v --cov=app --cov-report=html --cov-report=term-missing
+local-down:
+	docker-compose -f docker-compose.localstack.yml down
 
-lint:
-	flake8 app tests --max-line-length=100 --extend-ignore=E203,W503
-	mypy app
+frontend-dev:
+	cd frontend && npm run dev
 
-format:
-	black app tests
-	isort app tests
-
-run:
-	uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-docker-build:
-	docker-compose build
-
-docker-up:
-	docker-compose up -d
-
-docker-down:
-	docker-compose down
-
-migrate:
-	alembic upgrade head
-
-migrate-create:
-	alembic revision --autogenerate -m "$(msg)"
+aws-deploy:
+	cd terraform && terraform apply
+	cd ../frontend && npm run build && aws s3 sync dist/ s3://$(BUCKET_NAME)/ --delete
