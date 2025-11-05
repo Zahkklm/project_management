@@ -12,6 +12,7 @@ A full-stack project management system built with React and FastAPI, featuring d
 - **API**: https://dmrrrkmv14m3m.cloudfront.net
 - **API Docs**: https://dmrrrkmv14m3m.cloudfront.net/docs
 - **ALB**: http://project-management-alb-942012392.eu-west-1.elb.amazonaws.com
+- **Postman Collection**: https://www.postman.com/workspace/My-Workspace~ec53562f-b09d-4deb-851e-c2a71a34a647/collection/19612596-aebefa66-4fe5-4585-9d85-4088df55272f?action=share&creator=19612596
 
 ## Architecture
 

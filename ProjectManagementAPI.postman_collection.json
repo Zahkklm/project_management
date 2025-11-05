@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Project Management API",
-    "description": "Complete API collection for Project Management System with authentication, projects, and document management.\n\n## Quick Start\n1. Set `base_url` variable (default: http://localhost:8000)\n2. Run 'Register User' to create account\n3. Run 'Login' to get JWT token (auto-saved)\n4. Use other endpoints with authentication\n\n## Features\n- JWT Authentication (1-hour expiration)\n- Project CRUD operations\n- Document upload/download (PDF, DOCX)\n- User invitations\n- Role-based access (owner/participant)",
+    "description": "Complete API collection for Project Management System with authentication, projects, and document management.\n\n## Quick Start\n1. Set `base_url` variable (default: http://project-management-alb-942012392.eu-west-1.elb.amazonaws.com)\n2. Run 'Register User' to create account\n3. Run 'Login' to get JWT token (auto-saved)\n4. Use other endpoints with authentication\n\n## Features\n- JWT Authentication (1-hour expiration)\n- Project CRUD operations\n- Document upload/download (PDF, DOCX)\n- User invitations\n- Role-based access (owner/participant)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "version": "2.0.0"
   },
