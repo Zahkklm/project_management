@@ -1,8 +1,172 @@
-# Project Management API
+# Project Management API - React + FastAPI
 [![CI/CD](https://github.com/Zahkklm/project_management/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Zahkklm/project_management/actions/workflows/ci-cd.yml)
 [![Coverage](https://codecov.io/gh/Zahkklm/project_management/branch/main/graph/badge.svg)](https://codecov.io/gh/Zahkklm/project_management)
 
-A FastAPI-based project management system with document storage, user authentication, and project collaboration features.
+**Live Demo**: [https://d2sicjv5uods5w.cloudfront.net/login](https://d2sicjv5uods5w.cloudfront.net/login)
+
+A full-stack project management system built with React and FastAPI, featuring document storage, user authentication, and project collaboration.
+
+## Live Deployment
+
+- **Frontend**: https://d2sicjv5uods5w.cloudfront.net
+- **API**: https://dmrrrkmv14m3m.cloudfront.net
+- **API Docs**: https://dmrrrkmv14m3m.cloudfront.net/docs
+- **ALB**: http://project-management-alb-942012392.eu-west-1.elb.amazonaws.com
+
+## Architecture
+
+### AWS Infrastructure Diagram
+
+```mermaid
+graph TB
+    subgraph "Users"
+        U1[Web Browser]
+        U2[Mobile App]
+    end
+
+    subgraph "AWS Cloud - eu-west-1"
+        subgraph "CloudFront CDN"
+            CF1[Frontend Distribution<br/>d2sicjv5uods5w]
+            CF2[API Distribution<br/>dmrrrkmv14m3m]
+        end
+
+        subgraph "VPC - 10.0.0.0/16"
+            subgraph "Public Subnets"
+                ALB[Application Load Balancer<br/>project-management-alb]
+                NAT[NAT Gateway]
+            end
+
+            subgraph "Private Subnets"
+                ECS1[ECS Fargate Task 1<br/>FastAPI Container]
+                ECS2[ECS Fargate Task 2<br/>FastAPI Container]
+                RDS[(RDS PostgreSQL 15<br/>project-management-db)]
+            end
+        end
+
+        subgraph "Storage & Compute"
+            S3_DOCS[S3 Bucket<br/>Documents Storage]
+            S3_FRONT[S3 Bucket<br/>Frontend Static Files]
+            ECR[ECR Repository<br/>Docker Images]
+            LAMBDA[Lambda Function<br/>Image Processor]
+        end
+
+        subgraph "Monitoring & Logs"
+            CW[CloudWatch Logs]
+        end
+
+        SES[AWS SES<br/>Email Service]
+    end
+
+    U1 --> CF1
+    U2 --> CF1
+    U1 --> CF2
+    U2 --> CF2
+    
+    CF1 --> S3_FRONT
+    CF2 --> ALB
+    
+    ALB --> ECS1
+    ALB --> ECS2
+    
+    ECS1 --> RDS
+    ECS2 --> RDS
+    ECS1 --> S3_DOCS
+    ECS2 --> S3_DOCS
+    ECS1 --> SES
+    ECS2 --> SES
+    
+    S3_DOCS --> LAMBDA
+    LAMBDA --> S3_DOCS
+    
+    ECS1 --> CW
+    ECS2 --> CW
+    LAMBDA --> CW
+    
+    ECR -.->|Pull Images| ECS1
+    ECR -.->|Pull Images| ECS2
+
+    style CF1 fill:#FF9900
+    style CF2 fill:#FF9900
+    style ALB fill:#FF9900
+    style ECS1 fill:#FF9900
+    style ECS2 fill:#FF9900
+    style RDS fill:#3B48CC
+    style S3_DOCS fill:#569A31
+    style S3_FRONT fill:#569A31
+    style LAMBDA fill:#FF9900
+    style SES fill:#DD344C
+```
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Internet Users                          │
+└────────────────────────┬────────────────────────────────────────┘
+                         │
+                         ▼
+         ┌───────────────────────────────────┐
+         │   CloudFront (HTTPS)              │
+         │   - Frontend: d2sicjv5uods5w      │
+         │   - API: dmrrrkmv14m3m            │
+         └───────┬───────────────────┬───────┘
+                 │                   │
+        ┌────────▼────────┐   ┌──────▼──────────┐
+        │   S3 Bucket     │   │  ALB (HTTP)     │
+        │   Frontend      │   │  Port 80        │
+        └─────────────────┘   └────────┬────────┘
+                                       │
+                    ┌──────────────────┼──────────────────┐
+                    │                  │                  │
+            ┌───────▼────────┐ ┌──────▼────────┐ ┌──────▼────────┐
+            │  ECS Fargate   │ │  ECS Fargate  │ │  ECS Fargate  │
+            │  Task 1        │ │  Task 2       │ │  Task N       │
+            │  (FastAPI)     │ │  (FastAPI)    │ │  (FastAPI)    │
+            └───┬────────┬───┘ └───┬───────┬───┘ └───┬───────┬───┘
+                │        │         │       │         │       │
+                │        └─────────┼───────┼─────────┘       │
+                │                  │       │                 │
+        ┌───────▼────────┐  ┌──────▼───────▼──────┐  ┌──────▼──────┐
+        │  RDS PostgreSQL│  │   S3 Documents      │  │  AWS SES    │
+        │  (Private)     │  │   Bucket            │  │  (Email)    │
+        └────────────────┘  └──────┬──────────────┘  └─────────────┘
+                                   │
+                            ┌──────▼──────────┐
+                            │  Lambda         │
+                            │  Image Resize   │
+                            └─────────────────┘
+```
+
+### Component Details
+
+| Component | Type | Purpose |
+|-----------|------|----------|
+| **CloudFront** | CDN | HTTPS termination, global content delivery |
+| **ALB** | Load Balancer | Distributes traffic across ECS tasks |
+| **ECS Fargate** | Compute | Runs FastAPI containers (256 CPU, 512 MB) |
+| **RDS PostgreSQL** | Database | Stores users, projects, documents metadata |
+| **S3** | Storage | Document files + Frontend static files |
+| **Lambda** | Serverless | Automatic image resizing on upload |
+| **SES** | Email | Sends project invitation emails |
+| **ECR** | Registry | Stores Docker images |
+| **CloudWatch** | Monitoring | Logs and metrics collection |
+
+### Data Flow
+
+1. **User Authentication**:
+   ```
+   User → CloudFront → ALB → ECS (FastAPI) → RDS → JWT Token
+   ```
+
+2. **Document Upload**:
+   ```
+   User → CloudFront → ALB → ECS → S3 → Lambda (resize) → S3
+   ```
+
+3. **Project Invitation**:
+   ```
+   User → CloudFront → ALB → ECS → SES → Email → Recipient
+   ```
 
 ## Features
 
@@ -185,7 +349,7 @@ pytest tests/test_auth.py -v
 The GitHub Actions workflow includes:
 
 1. **Linting**: Black, isort, Flake8
-2. **Testing**: pytest with coverage reporting (31 tests, 53% coverage)
+2. **Testing**: pytest with coverage reporting (85 tests, 84% coverage)
 3. **Building**: Docker image build and push to Amazon ECR
 4. **Deployment**: Automated deployment to AWS ECS on merge to main
 
