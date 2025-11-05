@@ -28,6 +28,7 @@ app.include_router(join.router, tags=["join"])
 
 @app.get("/")
 def root():
+    """Root endpoint - API information"""
     return {"message": "Project Management API", "version": settings.VERSION}
 
 
