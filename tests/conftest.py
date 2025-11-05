@@ -118,6 +118,7 @@ def client(db_session, aws_mocks):
 def test_user(client):
     user_data = {
         "login": "testuser",
+        "email": "testuser@example.com",
         "password": "testpass123",
         "repeat_password": "testpass123",
     }
@@ -129,6 +130,7 @@ def test_user(client):
 def auth_headers(client):
     user_data = {
         "login": "testuser",
+        "email": "testuser@example.com",
         "password": "testpass123",
         "repeat_password": "testpass123",
     }

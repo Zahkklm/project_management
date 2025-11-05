@@ -28,7 +28,11 @@ def create_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
     # Truncate password to 72 characters for bcrypt compatibility
     hashed_password = get_password_hash(user_data.password[:72])
-    new_user = User(login=user_data.login, hashed_password=hashed_password)
+    new_user = User(
+        login=user_data.login,
+        email=user_data.email,
+        hashed_password=hashed_password,
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

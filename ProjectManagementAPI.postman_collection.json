@@ -496,7 +496,7 @@
   "variable": [
     { 
       "key": "base_url", 
-      "value": "http://localhost:8000",
+      "value": "http://project-management-alb-942012392.eu-west-1.elb.amazonaws.com",
       "type": "string"
     },
     { 

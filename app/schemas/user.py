@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 LOGIN_REGEX = r"^[a-zA-Z0-9_.-]+$"
 
@@ -11,6 +11,7 @@ class UserCreate(BaseModel):
         pattern=LOGIN_REGEX,
         example="johndoe",
     )
+    email: EmailStr
     password: str = Field(
         ..., min_length=6, max_length=128, example="strongpassword"
     )
@@ -48,6 +49,7 @@ class UserResponse(BaseModel):
         pattern=LOGIN_REGEX,
         example="johndoe",
     )
+    email: str
 
     class Config:
         from_attributes = True

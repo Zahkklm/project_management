@@ -57,10 +57,13 @@ class InviteToken(Base):
         Returns:
             True if token is not expired and not used
         """
-        return (
-            self.used_at is None
-            and datetime.now(timezone.utc) < self.expires_at
+        now = datetime.now(timezone.utc)
+        expires = (
+            self.expires_at.replace(tzinfo=timezone.utc)
+            if self.expires_at.tzinfo is None
+            else self.expires_at
         )
+        return self.used_at is None and now < expires
 
     def mark_as_used(self):
         """Mark the token as used."""

@@ -4,6 +4,7 @@ from fastapi import status
 def test_create_user(client):
     user_data = {
         "login": "newuser",
+        "email": "newuser@example.com",
         "password": "password123",
         "repeat_password": "password123",
     }
@@ -11,12 +12,14 @@ def test_create_user(client):
     assert response.status_code == status.HTTP_201_CREATED
     data = response.json()
     assert data["login"] == "newuser"
+    assert data["email"] == "newuser@example.com"
     assert "id" in data
 
 
 def test_create_user_duplicate(client, test_user):
     user_data = {
         "login": "testuser",
+        "email": "testuser@example.com",
         "password": "password123",
         "repeat_password": "password123",
     }
@@ -27,6 +30,7 @@ def test_create_user_duplicate(client, test_user):
 def test_create_user_password_mismatch(client):
     user_data = {
         "login": "newuser",
+        "email": "newuser@example.com",
         "password": "password123",
         "repeat_password": "different123",
     }

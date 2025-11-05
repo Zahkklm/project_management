@@ -102,6 +102,7 @@ def test_delete_project(client, auth_headers):
 def test_invite_user_to_project(client, auth_headers):
     user_data = {
         "login": "inviteduser",
+        "email": "inviteduser@example.com",
         "password": "password123",
         "repeat_password": "password123",
     }
